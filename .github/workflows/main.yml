@@ -1,0 +1,33 @@
+name: test
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    branches: [ main ]
+  
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine workflow run event context
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            echo "Running tests on the merged main branch"
+            echo "on-event=push" >> $GITHUB_ENV 
+          else
+            echo "Running tests on the pull request head branch"
+            echo "on-event=pull_request" >> $GITHUB_ENV
+          fi
+      - name: pull_request event
+        if: ${{env.on-event == "pull_request"}}
+        run: echo "pull request event"
+      - name: push event
+        if: ${{env.on-event == "push"}}
+        run: echo "push event"
+ 
