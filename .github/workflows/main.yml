@@ -1,33 +1,28 @@
-name: test
+name: Event Checker
 
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-    branches: [ main ]
-  
   push:
-    branches: [ main ]
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  test:
+  check-event:
     runs-on: ubuntu-latest
     steps:
-      - name: Determine workflow run event context
-        run: |
-          if [ "${{ github.event_name }}" == "push" ]; then
-            echo "Running tests on the merged main branch"
-            echo "on-event=push" >> $GITHUB_ENV 
-          else
-            echo "Running tests on the pull request head branch"
-            echo "on-event=pull_request" >> $GITHUB_ENV
-          fi
-      - name: pull_request event
-        if: ${{env.on-event == "pull_request"}}
-        run: echo "pull request event"
-      - name: push event
-        if: ${{env.on-event == "push"}}
-        run: echo "push event"
- 
+      # Step 1: Determine the event type
+      - name: Determine Event Type
+        id: event_type
+        run: echo "EVENT_TYPE=${{ github.event_name }}" >> $GITHUB_ENV
+
+      # Step 2: Push-only step
+      - name: Push Event Step
+        if: env.EVENT_TYPE == 'push'
+        run: echo "This is a push event."
+
+      # Step 3: Pull Request-only step
+      - name: Pull Request Event Step
+        if: env.EVENT_TYPE == 'pull_request'
+        run: echo "This is a pull request event."
